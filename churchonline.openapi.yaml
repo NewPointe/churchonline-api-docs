@@ -1,0 +1,356 @@
+openapi: 3.0.0
+info:
+  title: Church Online Platform API (Unofficial)
+  description: |-
+    Unofficial API documentation for Church Online Platform.
+
+    <details><summary>ToDo</summary>
+    - <del>**GET** `/api/v1/upcoming_event_times`</del>
+    - <del>**GET** `/api/v1/events</del>`
+    - <del>**GET** `/api/v1/events/current</del>`
+    - <del>**GET** `/api/v1/events/{EventId}</del>`
+    - **GET** `/api/v1/events/{EventId}/event_videos`
+    - **GET** `/api/v1/events/{EventId}/event_slides`
+    - **GET** `/api/v1/channels?event_time={EventTimeId}&token={AccessToken}`
+    - **GET** `/api/v1/channels/{Token}`
+    - **GET** `/api/v1/channels/{Token}/history`
+    - **PUT** `/api/v1/channels/identity/{Token}`
+    - **POST** `/api/v1/channels/{Token}/publish`
+    - **POST** `/api/v1/channels/{Token}/control`
+    - **POST** `/api/v1/channels/push_slide_action`
+    - **POST** `/api/v1/channels/push_slide/{SlideId}`
+    - **PUT** `/api/v1/live_responses/leave`
+    - **POST** `/api/v1/live_responses/transfer`
+    - **PUT** `/api/v1/live_responses/acknowledge`
+    - **GET** `/api/v1/live_responses/pending_requests`
+    - **POST** `/api/v1/users/facebook_login`
+    - **POST** `/api/v1/users`
+    - **POST** `/api/v1/users/reset_password`
+    - **PUT** `/api/v1/users/{Id}`
+    - **DELETE** `/api/v1/users/{Id}/destroy_avatar`
+    - **POST** `/api/v1/sessions`
+    - **POST** `/api/v1/direct_responses/decline`
+    - **POST** `/api/v1/reminders/email`
+    - **POST** `/api/v1/reminders/sms`
+    - **POST** `/api/v1/prayer_requests`
+    - **POST** `/api/v1/social/share/twitter`
+    - **POST** `/api/v1/polls/vote/{EventTimeId}/{SlideId}`
+    - **GET** `/api/v1/polls/{EventTimeId}/{SlideId}`
+    </details>
+  version: 0.0.1
+servers:
+  - url: https://{subdomain}.churchonline.org/v1
+    variables:
+      subdomain:
+        default: ""
+        description: Your church's subdomain on churchonline.org
+  - url: http://{custom_url}/v1
+    variables:
+      custom_url:
+        default: ""
+        description: Your church's custom Church Online url
+paths:
+  /api/v1/upcoming_event_times:
+    get:
+      summary: Gets upcomming events.
+      description: Gets a list of upcomming events.
+      tags:
+      - Events
+      operationId: get_upcoming_event_times
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    $ref: '#/components/schemas/Meta_Success'
+                  response:
+                    $ref: '#/components/schemas/Response_EventTimeList'
+  /api/v1/events:
+    get:
+      summary: Gets all events.
+      description: Gets a list of all events.
+      tags:
+      - Events
+      operationId: get_events
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    $ref: '#/components/schemas/Meta_Success'
+                  response:
+                    $ref: '#/components/schemas/Response_EventList'
+  /api/v1/events/current:
+    get:
+      summary: Gets the current event.
+      description: Gets the current event and when it starts.
+      tags:
+      - Events
+      operationId: get_events_current
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    $ref: '#/components/schemas/Meta_Success'
+                  response:
+                    type: object
+                    properties:
+                      item:
+                        type: object
+                        properties:
+                          isLive:
+                            description: If there is currently a live event
+                            type: boolean
+                          eventStartTime:
+                            description: When the Event starts
+                            type: string
+                            format: date-time
+        '404':
+          description: NOT FOUND
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    $ref: '#/components/schemas/Meta_NotFound'
+                  response:
+                    type: object
+                    nullable: true
+  /api/v1/events/{event_id}:
+    get:
+      summary: Gets an event.
+      description: Gets the details for an event.
+      tags:
+      - Events
+      parameters:
+        - in: path
+          name: event_id
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+          required: true
+          description: The numeric Id of the Event to get
+      operationId: get_event_by_id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    $ref: '#/components/schemas/Meta_Success'
+                  response:
+                    $ref: '#/components/schemas/Response_Event'
+        '404':
+          description: NOT FOUND
+components:
+  schemas:
+    Event:
+      type: object
+      properties:
+        id:
+          description: The Id
+          type: integer
+          format: int64
+          minimum: 0
+        organizationId:
+          description: The Organization Id
+          type: integer
+          format: int64
+          minimum: 0
+        description:
+          description: The Description
+          type: string
+        duration:
+          description: The Duration of the Event
+          type: integer
+          format: int64
+          minimum: 0
+        enabled:
+          description: If the Event is Enabled
+          type: boolean
+        speaker:
+          description: The Speaker for the Event
+          type: string
+        title:
+          description: The description of the Event
+          type: string
+        vrSimulated:
+          description: The vrSimulated.
+          nullable: true
+        sphericalVideo:
+          description: The sphericalVideo.
+          nullable: true
+        eventNotes:
+          description: The Event Notes
+          type: string
+        volunteerNotes:
+          description: The Volunteer Notes
+          type: string
+        facebookMessage:
+          description: The facebookMessage.
+          nullable: true
+        twitterMessage:
+          description: The twitterMessage.
+          nullable: true
+        emailMessage:
+          description: The emailMessage.
+          nullable: true
+        socialLink:
+          description: The socialLink.
+          nullable: true
+        slidesPaused:
+          description: If the slides are paused
+          type: boolean
+        enabledFeatures:
+          description: The Enabled Features
+          type: array
+          uniqueItems: true
+          items:
+            description: A Feature
+            type: string
+            enum:
+            - chat
+            - notes
+        customTab:
+          $ref: '#/components/schemas/CustomTab'
+        videoProfileStatus:
+          type: string
+          description: The Video Profile Status
+    EventTime:
+      description: A specific time for an event
+      type: object
+      properties:
+        eventTimeId:
+          type: number
+          format: int64
+          minimum: 0
+        eventId:
+          type: number
+          format: int64
+          minimum: 0
+        eventTime:
+          type: string
+          format: date-time
+        eventEndTime:
+          type: string
+          format: date-time
+        eventdescription:
+          type: string
+        eventTimeDoorsOpenOffset:
+          type: number
+          format: int64
+    CustomTab:
+      description: A Custom Tab
+      type: object
+      properties:
+        id:
+          description: The id
+          type: integer
+          format: int64
+          minimum: 0
+        description:
+          description: The description
+          type: string
+        content:
+          description: The content
+          type: string
+        sort_order:
+          description: The sort_order.
+          nullable: true
+        visible:
+          description: If the tab is visible
+          type: boolean
+        permanent:
+          description: If the tab is permanent
+          type: boolean
+        created_at:
+          description: When the Tab was created
+          type: string
+          format: date-time
+        updated_at:
+          description: When the Tab was updated
+          type: string
+          format: date-time
+        organization_id:
+          description: The Organization Id
+          type: integer
+          format: int64
+          minimum: 0
+    Meta_Success:
+      description: Response metadata for when a request is successful
+      type: object
+      properties:
+        status:
+          type: string
+          enum: ['200']
+    Meta_NotFound:
+      description: Response metadata for when a requested entity is missing
+      type: object
+      properties:
+        status:
+          type: string
+          enum: ['404']
+        errors:
+          type: array
+          items:
+            type: string
+    Response_Event:
+      description: A response with an event
+      type: object
+      properties:
+        item:
+          $ref: '#/components/schemas/Event'
+    Response_EventList:
+      description: A response with a list of events
+      type: object
+      properties:
+        count:
+          type: number
+          format: int64
+          minimum: 0
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Event'
+    Response_EventTimeList:
+      description: A response with a list of event times
+      type: object
+      properties:
+        count:
+          type: number
+          format: int64
+          minimum: 0
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventTime'
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
